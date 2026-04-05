@@ -66,9 +66,11 @@ export default function TransactionsScreen() {
       const m = now.getMonth() + 1;
       const y = now.getFullYear();
       const idx = slots.findIndex((s) => s.month === m && s.year === y);
-      if (idx >= 0 && idx !== activeIndex) {
+      if (idx >= 0) {
         setActiveIndex(idx);
-        flatListRef.current?.scrollToIndex({ index: idx, animated: false });
+        setTimeout(() => {
+          flatListRef.current?.scrollToIndex({ index: idx, animated: false });
+        }, 0);
       }
     }, [slots]),
   );

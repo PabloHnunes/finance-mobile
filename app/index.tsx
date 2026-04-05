@@ -32,6 +32,7 @@ export default function LoginScreen() {
     setLoading(true);
     try {
       await signIn(credentials);
+      router.replace('/(tabs)');
     } catch (error: any) {
       Alert.alert('Erro', error?.response?.data?.message ?? error?.message ?? 'E-mail ou senha inválidos.');
     } finally {

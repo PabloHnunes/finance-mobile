@@ -18,7 +18,8 @@
       },
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false,
-      "package": "com.cptnoko.financemobile"
+      "package": "com.cptnoko.financemobile",
+      "usesClearTextTraffic": true
     },
     "web": {
       "output": "static",
