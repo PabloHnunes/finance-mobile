@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, useEffect } from 'react';
-import { getAccessToken, clearTokens, setSessionExpiredCallback } from '@/services/api';
+import { getAccessToken, clearTokens, setSessionExpiredCallback, isAuthError } from '@/services/api';
 import { getUser, User } from '@/services/user';
 import { getBanks } from '@/services/bank';
 import { login as loginService } from '@/services/auth';
@@ -32,14 +32,26 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   async function loadStoredUser() {
     try {
       const token = await getAccessToken();
-      if (token) {
-        const payload = decodeJwtPayload(token);
-        const userData = await getUser(payload.sub);
-        setUser(userData);
-        prefetchBanks(userData.id);
+      if (!token) return;
+
+      let payload;
+      try {
+        payload = decodeJwtPayload(token);
+      } catch {
+        // Malformed token, unrecoverable.
+        await clearTokens();
+        return;
       }
-    } catch {
-      await clearTokens();
+
+      const userData = await getUser(payload.sub);
+      setUser(userData);
+      prefetchBanks(userData.id);
+    } catch (error) {
+      // Only clear on a genuine auth rejection. Network/timeout/5xx errors
+      // during startup shouldn't destroy an otherwise valid session.
+      if (isAuthError(error)) {
+        await clearTokens();
+      }
     } finally {
       setLoading(false);
     }

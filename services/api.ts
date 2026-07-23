@@ -9,6 +9,10 @@ export function setSessionExpiredCallback(callback: () => void) {
   onSessionExpired = callback;
 }
 
+export function isAuthError(error: unknown): boolean {
+  return axios.isAxiosError(error) && (error.response?.status === 401 || error.response?.status === 403);
+}
+
 export const api = axios.create({
   baseURL: API_BASE_URL,
   headers: {
@@ -47,9 +51,13 @@ api.interceptors.response.use(
         await saveTokens(data.accessToken, data.refreshToken);
         originalRequest.headers.Authorization = `Bearer ${data.accessToken}`;
         return api(originalRequest);
-      } catch {
-        await clearTokens();
-        onSessionExpired?.();
+      } catch (refreshError) {
+        // Only a genuine auth rejection means the refresh token is dead.
+        // Network/timeout/5xx failures shouldn't destroy a valid session.
+        if (isAuthError(refreshError)) {
+          await clearTokens();
+          onSessionExpired?.();
+        }
         return Promise.reject(error);
       }
     }
