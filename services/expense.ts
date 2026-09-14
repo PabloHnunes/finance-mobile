@@ -45,6 +45,7 @@ export interface ExpenseEntry {
     fees?: { name: string; type: string; value: number }[];
   } | null;
   createdById: string;
+  entryDate: string;
   createdAt: string;
   updatedAt: string;
   bank?: { id: string; name: string; documentType: string } | null;

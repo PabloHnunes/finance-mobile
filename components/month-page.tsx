@@ -134,7 +134,7 @@ export const MonthPage = memo(function MonthPage({ userId, month, year, banks, w
       map.get(key)!.push(expense);
     }
     const sortByDate = (a: ExpenseEntry, b: ExpenseEntry) =>
-      new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
+      new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
     const groups: { title: string; data: ExpenseEntry[] }[] = [];
     for (const [key, items] of map) {
       if (key !== "__others__") {
@@ -159,7 +159,7 @@ export const MonthPage = memo(function MonthPage({ userId, month, year, banks, w
       paymentType: expense.paymentType ?? "",
       isPriority: expense.isPriority,
       bankId: expense.bankId ?? "",
-      dueDay: new Date(expense.createdAt).getDate(),
+      dueDay: new Date(expense.entryDate).getDate(),
       splitParts: String(expense.splitParts),
       userPart: String(expense.userPart),
     });

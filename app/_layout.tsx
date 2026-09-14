@@ -23,14 +23,13 @@ function RootNavigation() {
   return (
     <>
       <Stack screenOptions={{ headerShown: false }}>
-        {signed ? (
+        <Stack.Protected guard={signed}>
           <Stack.Screen name="(tabs)" />
-        ) : (
-          <>
-            <Stack.Screen name="index" />
-            <Stack.Screen name="register" />
-          </>
-        )}
+        </Stack.Protected>
+        <Stack.Protected guard={!signed}>
+          <Stack.Screen name="index" />
+          <Stack.Screen name="register" />
+        </Stack.Protected>
       </Stack>
       <StatusBar style={colorScheme === 'dark' ? 'light' : 'dark'} />
     </>

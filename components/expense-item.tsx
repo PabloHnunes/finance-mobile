@@ -34,7 +34,7 @@ interface Props {
 export const ExpenseItem = memo(function ExpenseItem({ expense, onPress, hideValues }: Props) {
   const amount = Number(expense.amount);
   const effectiveAmount = amount * (expense.userPart / expense.splitParts);
-  const date = new Date(expense.createdAt);
+  const date = new Date(expense.entryDate);
   const dateStr = `${String(date.getDate()).padStart(2, '0')}/${String(date.getMonth() + 1).padStart(2, '0')}`;
   const category = expense.recurringExpense?.name ?? (expense.expenseCategory ? CATEGORY_LABELS[expense.expenseCategory] ?? expense.expenseCategory : 'Sem categoria');
   const payment = expense.paymentType ? PAYMENT_LABELS[expense.paymentType] : null;
