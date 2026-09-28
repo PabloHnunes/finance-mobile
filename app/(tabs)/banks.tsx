@@ -5,7 +5,7 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '@/contexts/auth';
-import { createBank, deleteBank, DocumentType } from '@/services/bank';
+import { Bank, createBank, deleteBank, DocumentType } from '@/services/bank';
 import { useBanks } from '@/hooks/use-banks';
 import { maskCpf, unmask } from '@/utils/masks';
 

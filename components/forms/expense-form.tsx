@@ -6,25 +6,9 @@ import { createExpense, ExpenseCategory, PaymentType } from '@/services/expense'
 import { createRecurringExpense } from '@/services/recurring-expense';
 import { useBanks } from '@/hooks/use-banks';
 import { maskCurrency, currencyToNumber } from '@/utils/currency-input';
-import { maskDate, dateToIso } from '@/utils/masks';
-
-const CATEGORIES: { value: ExpenseCategory; label: string }[] = [
-  { value: 'GROCERIES', label: 'Alimentação' },
-  { value: 'TRANSPORTATION', label: 'Transporte' },
-  { value: 'HEALTHCARE', label: 'Saúde' },
-  { value: 'EDUCATION', label: 'Educação' },
-  { value: 'LEISURE', label: 'Lazer' },
-  { value: 'UTILITIES', label: 'Contas' },
-];
-
-const PAYMENT_TYPES: { value: PaymentType; label: string }[] = [
-  { value: 'PIX', label: 'Pix' },
-  { value: 'CREDIT', label: 'Crédito' },
-  { value: 'DEBIT', label: 'Débito' },
-  { value: 'CASH', label: 'Dinheiro' },
-  { value: 'TRANSFER', label: 'Transferência' },
-  { value: 'BOLETO', label: 'Boleto' },
-];
+import { getSuggestedEntryDate, useMonthCutoff } from '@/hooks/use-month-cutoff';
+import { DatePicker } from '@/components/date-picker';
+import { CATEGORIES, PAYMENT_TYPES } from '@/constants/expense';
 
 const DAYS = Array.from({ length: 31 }, (_, i) => i + 1);
 
@@ -35,12 +19,15 @@ interface Props {
 
 export function ExpenseForm({ userId, onSaved }: Props) {
   const [isRecurring, setIsRecurring] = useState(false);
+  const { cutoffDay } = useMonthCutoff();
+  const suggestedDate = getSuggestedEntryDate(cutoffDay);
   const [form, setForm] = useState({
     name: '',
+    description: '',
     amount: '0,00',
-    date: '',
+    date: suggestedDate,
     dueDay: 1,
-    startDate: '',
+    startDate: suggestedDate,
     category: '' as ExpenseCategory | '',
     paymentType: '' as PaymentType | '',
     bankId: '',
@@ -60,17 +47,13 @@ export function ExpenseForm({ userId, onSaved }: Props) {
 
     if (isRecurring) {
       if (!form.name.trim()) return Alert.alert('Atenção', 'Preencha o nome da despesa recorrente.');
-      if (form.startDate.length !== 10) return Alert.alert('Atenção', 'Preencha a data de início.');
-
-      const startIso = dateToIso(form.startDate);
-
       setSaving(true);
       try {
         await createRecurringExpense(userId, {
           name: form.name,
           amount,
           dueDay: form.dueDay,
-          startDate: `${startIso}T00:00:00.000Z`,
+          startDate: `${form.startDate}T00:00:00.000Z`,
           expenseCategory: form.category || undefined,
           paymentType: form.paymentType || undefined,
           bankId: form.bankId || undefined,
@@ -90,12 +73,12 @@ export function ExpenseForm({ userId, onSaved }: Props) {
 
     setSaving(true);
     try {
-      const date = form.date.length === 10 ? dateToIso(form.date) : undefined;
       const splitParts = parseInt(form.splitParts) || undefined;
       const userPart = parseInt(form.userPart) || undefined;
       await createExpense(userId, {
         amount,
-        date: date ? `${date}T00:00:00.000Z` : undefined,
+        description: form.description.trim() || undefined,
+        date: `${form.date}T00:00:00.000Z`,
         expenseCategory: form.category || undefined,
         paymentType: form.paymentType || undefined,
         bankId: form.bankId || undefined,
@@ -138,6 +121,18 @@ export function ExpenseForm({ userId, onSaved }: Props) {
           />
         )}
 
+        {/* Descrição (só avulsa — a recorrente já tem nome) */}
+        {!isRecurring && (
+          <TextInput
+            className={inputClass}
+            placeholder="Descrição (opcional, ex: Padaria)"
+            placeholderTextColor="#7C7C8A"
+            maxLength={100}
+            value={form.description}
+            onChangeText={(v) => setForm((p) => ({ ...p, description: v }))}
+          />
+        )}
+
         {/* Valor */}
         <View className={`${inputClass} flex-row items-center`}>
           <Text className="text-gray-300 dark:text-gray-200 text-base mr-1">R$</Text>
@@ -177,27 +172,19 @@ export function ExpenseForm({ userId, onSaved }: Props) {
 
         {/* Datas início/fim (só recorrente) */}
         {isRecurring && (
-          <TextInput
-            className={inputClass}
-            placeholder="Data de início"
-            placeholderTextColor="#7C7C8A"
-            keyboardType="numeric"
-            maxLength={10}
+          <DatePicker
+            label="Data de início"
             value={form.startDate}
-            onChangeText={(v) => setForm((p) => ({ ...p, startDate: maskDate(v) }))}
+            onChange={(v) => setForm((p) => ({ ...p, startDate: v }))}
           />
         )}
 
-        {/* Data retroativa (só avulsa) */}
+        {/* Data do lançamento (só avulsa) */}
         {!isRecurring && (
-          <TextInput
-            className={inputClass}
-            placeholder="Data (deixe vazio para hoje)"
-            placeholderTextColor="#7C7C8A"
-            keyboardType="numeric"
-            maxLength={10}
+          <DatePicker
+            label="Data do lançamento"
             value={form.date}
-            onChangeText={(v) => setForm((p) => ({ ...p, date: maskDate(v) }))}
+            onChange={(v) => setForm((p) => ({ ...p, date: v }))}
           />
         )}
 

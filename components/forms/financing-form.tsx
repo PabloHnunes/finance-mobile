@@ -6,15 +6,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { createFinancing, FinancingType, AmortizationType, FinancingFee, FeeType } from '@/services/financing';
 import { useBanks } from '@/hooks/use-banks';
 import { PaymentType } from '@/services/expense';
-
-const PAYMENT_TYPES: { value: PaymentType; label: string }[] = [
-  { value: 'PIX', label: 'Pix' },
-  { value: 'CREDIT', label: 'Crédito' },
-  { value: 'DEBIT', label: 'Débito' },
-  { value: 'CASH', label: 'Dinheiro' },
-  { value: 'TRANSFER', label: 'Transferência' },
-  { value: 'BOLETO', label: 'Boleto' },
-];
+import { PAYMENT_TYPES } from '@/constants/expense';
 import { maskCurrency, currencyToNumber } from '@/utils/currency-input';
 
 const MONTHS = [

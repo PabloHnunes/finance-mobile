@@ -22,6 +22,7 @@ export type PaymentType =
 export interface ExpenseEntry {
   id: string;
   amount: number;
+  description?: string | null;
   expenseCategory?: ExpenseCategory;
   paymentType?: PaymentType;
   isPriority: boolean;
@@ -53,6 +54,8 @@ export interface ExpenseEntry {
 
 export interface CreateExpenseRequest {
   amount: number;
+  /** null limpa a descrição (só no update) */
+  description?: string | null;
   expenseCategory?: ExpenseCategory;
   paymentType?: PaymentType;
   date?: string;

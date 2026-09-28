@@ -5,6 +5,7 @@ import { useBanks } from "@/hooks/use-banks";
 import { useExpenses } from "@/hooks/use-expenses";
 import { useHideValues } from "@/hooks/use-hide-values";
 import { formatCurrency } from "@/utils/currency";
+import { CATEGORY_LABELS, PAYMENT_LABELS } from "@/constants/expense";
 import { Ionicons } from "@expo/vector-icons";
 import { useFocusEffect } from "expo-router";
 import { useCallback, useMemo, useRef, useState } from "react";
@@ -91,18 +92,6 @@ export default function BalanceScreen() {
 
   const isPositive = (balance?.balance ?? 0) >= 0;
 
-  const CATEGORY_LABELS: Record<string, string> = {
-    GROCERIES: "Alimentação",
-    TRANSPORTATION: "Transporte",
-    HEALTHCARE: "Saúde",
-    EDUCATION: "Educação",
-    LEISURE: "Lazer",
-    UTILITIES: "Contas",
-    LOAN: "Empréstimo",
-    FINANCING_PROPERTY: "Financ. Imóvel",
-    FINANCING_VEHICLE: "Financ. Veículo",
-  };
-
   const CATEGORY_COLORS: Record<string, string> = {
     GROCERIES: "bg-orange-500",
     TRANSPORTATION: "bg-blue-500",
@@ -120,15 +109,6 @@ export default function BalanceScreen() {
         .filter(([, v]) => v > 0)
         .sort(([, a], [, b]) => b - a)
     : [];
-
-  const PAYMENT_LABELS: Record<string, string> = {
-    PIX: "Pix",
-    CREDIT: "Crédito",
-    DEBIT: "Débito",
-    CASH: "Dinheiro",
-    TRANSFER: "Transferência",
-    BOLETO: "Boleto",
-  };
 
   const payments = balance?.expensesByPaymentType
     ? Object.entries(balance.expensesByPaymentType)

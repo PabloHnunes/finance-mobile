@@ -1,5 +1,6 @@
 import { useAuth } from "@/contexts/auth";
 import { useBanks } from "@/hooks/use-banks";
+import { useMonthCutoff } from "@/hooks/use-month-cutoff";
 import { Bank, createBank, deleteBank, updateBank, DocumentType } from "@/services/bank";
 import { fetchAddress } from "@/services/cep";
 import { updateUser, uploadProfileImage } from "@/services/user";
@@ -30,6 +31,9 @@ const DOC_TYPES: { value: DocumentType; label: string }[] = [
   { value: "CNPJ", label: "CNPJ" },
 ];
 
+// Até 28 para funcionar em todos os meses (inclusive fevereiro)
+const CUTOFF_DAYS = Array.from({ length: 27 }, (_, i) => i + 2);
+
 function maskCnpj(value: string): string {
   const digits = value.replace(/\D/g, "").slice(0, 14);
   return digits
@@ -46,6 +50,7 @@ export default function ProfileScreen() {
     isLoading: banksLoading,
     invalidate: invalidateBanks,
   } = useBanks(user?.id);
+  const { cutoffDay, setCutoffDay } = useMonthCutoff();
 
   // Profile image
   const [uploadingImage, setUploadingImage] = useState(false);
@@ -779,6 +784,50 @@ export default function ProfileScreen() {
         )}
 
         {!showBanks && <View className="mb-4" />}
+
+        {/* ── Virada de mês ───────────────────────────────────────── */}
+        <View className="bg-white dark:bg-gray-600 rounded-2xl p-5 mb-4">
+          <View className="flex-row items-center gap-3 mb-1">
+            <Ionicons name="calendar-outline" size={22} color="#00B37E" />
+            <Text className="text-gray-700 dark:text-gray-100 text-base font-bold">
+              Virada de mês
+            </Text>
+          </View>
+          <Text className="text-gray-300 dark:text-gray-200 text-xs mb-3">
+            {cutoffDay === null
+              ? "A tela inicial mostra sempre o mês corrente."
+              : `A partir do dia ${cutoffDay}, a tela inicial mostra o mês seguinte.`}
+          </Text>
+          <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+            <View className="flex-row gap-1">
+              <TouchableOpacity
+                onPress={() => setCutoffDay(null)}
+                className={`px-3 h-9 rounded-lg items-center justify-center ${
+                  cutoffDay === null ? "bg-green-700" : "bg-gray-50 dark:bg-gray-500"
+                }`}
+                activeOpacity={0.7}
+              >
+                <Text className={`text-xs ${cutoffDay === null ? "text-white font-bold" : "text-gray-300 dark:text-gray-200"}`}>
+                  Desligado
+                </Text>
+              </TouchableOpacity>
+              {CUTOFF_DAYS.map((d) => (
+                <TouchableOpacity
+                  key={d}
+                  onPress={() => setCutoffDay(d)}
+                  className={`w-9 h-9 rounded-lg items-center justify-center ${
+                    cutoffDay === d ? "bg-green-700" : "bg-gray-50 dark:bg-gray-500"
+                  }`}
+                  activeOpacity={0.7}
+                >
+                  <Text className={`text-xs ${cutoffDay === d ? "text-white font-bold" : "text-gray-300 dark:text-gray-200"}`}>
+                    {d}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+          </ScrollView>
+        </View>
 
         {/* ── Opções ──────────────────────────────────────────────── */}
         <View className="bg-white dark:bg-gray-600 rounded-2xl overflow-hidden mb-4">
